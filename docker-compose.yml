@@ -1,0 +1,28 @@
+version: "3.9"
+services:
+  db:
+    container_name: db-treinamento-educbank
+    image: mongo:7.0.4
+    ports:
+      - 27017:27017
+    volumes:
+      - db_data:/data/db
+
+  redis:
+    container_name: redis-treinamento-educbank
+    image: redis:alpine3.19
+    ports:
+      - 6379:6379
+
+  rabbitmq:
+    container_name: rabbitmq-treinamento-educbank
+    image: rabbitmq:3-management-alpine
+    expose:
+      - 5672
+      - 15672
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+
+volumes:
+  db_data:
