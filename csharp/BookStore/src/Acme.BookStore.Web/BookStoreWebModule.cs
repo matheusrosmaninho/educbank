@@ -9,6 +9,8 @@ using Acme.BookStore.MongoDB;
 using Acme.BookStore.Localization;
 using Acme.BookStore.MultiTenancy;
 using Acme.BookStore.Web.Menus;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.OpenApi.Models;
 using OpenIddict.Validation.AspNetCore;
 using Volo.Abp;
@@ -211,5 +213,23 @@ public class BookStoreWebModule : AbpModule
         app.UseAuditing();
         app.UseAbpSerilogEnrichers();
         app.UseConfiguredEndpoints();
+
+        app.UseCookiePolicy(new CookiePolicyOptions()
+        {
+            MinimumSameSitePolicy = SameSiteMode.None
+        });
+        app.UseCookiePolicy(new CookiePolicyOptions()
+        {
+            MinimumSameSitePolicy = SameSiteMode.Lax
+        });
+        app.UseCookiePolicy(new CookiePolicyOptions
+        {
+            Secure = CookieSecurePolicy.Always
+        });
+        app.UseForwardedHeaders(new ForwardedHeadersOptions
+        {
+            ForwardedHeaders = ForwardedHeaders.XForwardedProto
+        });
+
     }
 }
