@@ -24,13 +24,7 @@ $(function () {
                 {
                     title: l('PublishDate'),
                     data: "publishDate",
-                    render: function (data) {
-                        return luxon
-                            .DateTime
-                            .fromISO(data, {
-                                locale: abp.localization.currentCulture.name
-                            }).toLocaleString();
-                    }
+                    dataFormat: "datetime"
                 },
                 {
                     title: l('Price'),
@@ -38,15 +32,20 @@ $(function () {
                 },
                 {
                     title: l('CreationTime'), data: "creationTime",
-                    render: function (data) {
-                        return luxon
-                            .DateTime
-                            .fromISO(data, {
-                                locale: abp.localization.currentCulture.name
-                            }).toLocaleString(luxon.DateTime.DATETIME_SHORT);
-                    }
+                    dataFormat: "datetime"
                 }
             ]
         })
-        );
+    );
+
+    var createModal = new abp.ModalManager(abp.appPath + 'Books/CreateModal');
+
+    createModal.onResult(function () {
+        dataTable.ajax.reload();
+    });
+
+    $('#NewBookButton').click(function (e) {
+        e.preventDefault();
+        createModal.open();
+    });
 });
