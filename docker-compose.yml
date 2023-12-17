@@ -24,5 +24,24 @@ services:
       - "15672:15672"
       - "5672:5672"
 
+  minio:
+    image: minio/minio
+    container_name: educbank-infra-minio
+    volumes:
+      - minio_data:/export
+      - minio_config:/root/.minio
+    expose:
+      - 9000
+      - 9001
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ACCESS_KEY: "minioadmin"
+      MINIO_SECRET_KEY: "minioadmin"
+    command: server /export --console-address ":9001"
+
 volumes:
   db_data:
+  minio_config:
+  minio_data:

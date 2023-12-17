@@ -14,6 +14,11 @@ using Volo.Abp.PermissionManagement.Identity;
 using Volo.Abp.PermissionManagement.OpenIddict;
 using Volo.Abp.SettingManagement;
 using Volo.Abp.TenantManagement;
+using Volo.Abp.BlobStoring;
+using Volo.Abp.BlobStoring.Minio;
+using System;
+using Microsoft.Extensions.Configuration;
+using Acme.BookStore.Books;
 
 namespace Acme.BookStore;
 
@@ -28,12 +33,19 @@ namespace Acme.BookStore;
     typeof(AbpPermissionManagementDomainIdentityModule),
     typeof(AbpSettingManagementDomainModule),
     typeof(AbpTenantManagementDomainModule),
-    typeof(AbpEmailingModule)
+    typeof(AbpEmailingModule),
+    typeof(AbpBlobStoringMinioModule)
 )]
 public class BookStoreDomainModule : AbpModule
 {
+    private IConfiguration _configuration { get; set; }
+
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
+        _configuration = context.Services.GetConfiguration();
+
+        ConfigureMinioStorage();
+
         Configure<AbpLocalizationOptions>(options =>
         {
             options.Languages.Add(new LanguageInfo("ar", "ar", "العربية", "ae"));
@@ -64,5 +76,50 @@ public class BookStoreDomainModule : AbpModule
 #if DEBUG
         context.Services.Replace(ServiceDescriptor.Singleton<IEmailSender, NullEmailSender>());
 #endif
+    }
+
+    private void ConfigureMinioStorage()
+    {
+        Configure<AbpBlobStoringOptions>(options =>
+        {
+            options.Containers.ConfigureDefault(container =>
+            {
+                container.UseMinio(minio =>
+                {
+                    minio.EndPoint = "localhost:9000";
+                    minio.AccessKey = "minioadmin";
+                    minio.SecretKey = "minioadmin";
+                    minio.BucketName = "bookStore";
+                    minio.WithSSL = false;
+                    minio.CreateBucketIfNotExists = true;
+                });
+            });
+
+            ConfigureMinioContainer<ProfilePictureContainer>(options);
+        });
+    }
+
+    private void ConfigureMinioContainer<T>(AbpBlobStoringOptions options)
+    {
+        options.Containers.Configure<T>(containerConfiguration =>
+        {
+            containerConfiguration.UseMinio(x =>
+            {
+                x.BucketName = $"ebpay-{GetContainerName<T>()}";
+                x.EndPoint = "localhost:9000";
+                x.AccessKey = "minioadmin";
+                x.SecretKey = "minioadmin";
+                x.BucketName = "bookStore";
+                x.WithSSL = false;
+                x.CreateBucketIfNotExists = true;
+            });
+        });
+    }
+
+    private static string GetContainerName<T>()
+    {
+        var t = typeof(T);
+        var attribute = (BlobContainerNameAttribute) Attribute.GetCustomAttribute(t, typeof (BlobContainerNameAttribute));
+        return attribute == null ? t.Namespace : attribute.Name;
     }
 }
