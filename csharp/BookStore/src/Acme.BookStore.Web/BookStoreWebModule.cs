@@ -42,7 +42,6 @@ using Volo.Abp.VirtualFileSystem;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Acme.BookStore.Permissions;
 using Volo.Abp.BlobStoring;
-using Volo.Abp.BlobStoring.Minio;
 using Volo.Abp.AspNetCore.Mvc.AntiForgery;
 
 namespace Acme.BookStore.Web;
@@ -58,8 +57,7 @@ namespace Acme.BookStore.Web;
     typeof(AbpAspNetCoreMvcUiLeptonXLiteThemeModule),
     typeof(AbpTenantManagementWebModule),
     typeof(AbpAspNetCoreSerilogModule),
-    typeof(AbpSwashbuckleModule),
-    typeof(AbpBlobStoringMinioModule)
+    typeof(AbpSwashbuckleModule)
     )]
 public class BookStoreWebModule : AbpModule
 {
@@ -102,7 +100,6 @@ public class BookStoreWebModule : AbpModule
         ConfigureAutoApiControllers();
         ConfigureSwaggerServices(context.Services);
         ConfigureBookPermissions();
-        ConfigureMinioProvider();
         ConfigureAbpAntiforgeryOptions();
     }
 
@@ -249,23 +246,6 @@ public class BookStoreWebModule : AbpModule
             options.Conventions.AuthorizePage("/Books/Index", BookStorePermissions.Books.Default);
             options.Conventions.AuthorizePage("/Books/CreateModal", BookStorePermissions.Books.Create);
             options.Conventions.AuthorizePage("/Books/EditModal", BookStorePermissions.Books.Edit);
-        });
-    }
-
-    public void ConfigureMinioProvider()
-    {
-        Configure<AbpBlobStoringOptions>(options =>
-        {
-            options.Containers.ConfigureDefault(container =>
-            {
-                container.UseMinio(minio =>
-                {
-                    minio.EndPoint = "localhost:9000";
-                    minio.AccessKey = "minioadmin";
-                    minio.SecretKey = "minioadmin";
-                    minio.BucketName = "bookStore";
-                });
-            });
         });
     }
 
