@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Acme.BookStore.Authors;
 using Acme.BookStore.Books;
+using Acme.BookStore.Musics;
 using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.Domain.Repositories;
@@ -15,14 +16,18 @@ public class BookStoreDataSeederContributor
     private readonly IAuthorRepository _authorRepository;
     private readonly AuthorManager _authorManager;
 
+    private readonly IRepository<Music, Guid> _musicRepository;
+
     public BookStoreDataSeederContributor(
         IRepository<Book, Guid> bookRepository,
         IAuthorRepository authorRepository,
-        AuthorManager authorManager)
-    {
+        AuthorManager authorManager,
+        IRepository<Music, Guid> musicRepository
+    ) {
         _bookRepository = bookRepository;
         _authorRepository = authorRepository;
         _authorManager = authorManager;
+        _musicRepository = musicRepository;
     }
 
     public async Task SeedAsync(DataSeedContext context)
@@ -68,6 +73,15 @@ public class BookStoreDataSeederContributor
                 Type = BookType.ScienceFiction,
                 PublishDate = new DateTime(1995, 9, 27),
                 Price = 42.0f
+            },
+            autoSave: true
+        );
+
+        await _musicRepository.InsertAsync(
+            new Music{
+                Name = "It's my life",
+                Star = 5,
+                Description = "Rock"
             },
             autoSave: true
         );
