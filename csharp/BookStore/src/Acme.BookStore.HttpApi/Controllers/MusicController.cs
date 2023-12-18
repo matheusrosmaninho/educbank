@@ -22,8 +22,17 @@ public class MusicController : BookStoreController
 
     [ApiExplorerSettings(GroupName = GroupNameMusic)]
     [HttpGet]
-    public async Task<List<Music>> GetMusics() {
+    public async Task<List<Music>> GetMusics()
+    {
         var musics = await _musicRepository.GetListAsync();
         return musics;
+    }
+
+    [ApiExplorerSettings(GroupName = GroupNameMusic)]
+    [HttpGet($"id/{{musicId}}")]
+    public async Task<Music> GetMusicAsync(Guid musicId)
+    {
+        var music = await _musicRepository.GetAsync(musicId);
+        return music;
     }
 }
