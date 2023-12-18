@@ -15,12 +15,12 @@ namespace Acme.BookStore.Books;
 [Authorize(BookStorePermissions.Books.Default)]
 public class BookAppService :
     CrudAppService<
-        Book, //The Book entity
-        BookDto, //Used to show books
-        Guid, //Primary key of the book entity
-        PagedAndSortedResultRequestDto, //Used for paging/sorting
-        CreateUpdateBookDto>, //Used to create/update a book
-    IBookAppService //implement the IBookAppService
+        Book,
+        BookDto,
+        Guid,
+        PagedAndSortedResultRequestDto,
+        CreateUpdateBookDto>,
+    IBookAppService
 {
     private readonly IAuthorRepository _authorRepository;
 
